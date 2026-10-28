@@ -3,8 +3,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:haunted_signup_mansion/main.dart';
 
 void main() {
-  testWidgets('shows the Activity 10 starter form', (tester) async {
-    await tester.pumpWidget(const MyApp());
+  Future<void> openSignupForm(WidgetTester tester) async {
+    await tester.pumpWidget(const HauntedMansionApp());
+    await tester.tap(find.text('Enter If You Dare'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('opens the animated welcome screen first', (tester) async {
+    await tester.pumpWidget(const HauntedMansionApp());
+
+    expect(find.text('Sign the guest book… if you dare.'), findsOneWidget);
+    expect(find.text('Enter If You Dare'), findsOneWidget);
+  });
+
+  testWidgets('opens the Activity 10 starter form from the foyer', (
+    tester,
+  ) async {
+    await openSignupForm(tester);
 
     expect(find.text('Create Your Account'), findsOneWidget);
     expect(find.text('Full Name'), findsOneWidget);
@@ -14,7 +29,7 @@ void main() {
   });
 
   testWidgets('shows all required errors for empty input', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await openSignupForm(tester);
     await tester.tap(find.text('Sign Up'));
     await tester.pump();
 
@@ -24,7 +39,7 @@ void main() {
   });
 
   testWidgets('rejects an invalid email and short password', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await openSignupForm(tester);
     await tester.enterText(find.byType(EditableText).at(0), 'Morgan');
     await tester.enterText(
       find.byType(EditableText).at(1),
@@ -39,7 +54,7 @@ void main() {
   });
 
   testWidgets('accepts valid starter-form input', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await openSignupForm(tester);
     await tester.enterText(find.byType(EditableText).at(0), 'Morgan');
     await tester.enterText(
       find.byType(EditableText).at(1),
