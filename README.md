@@ -43,8 +43,38 @@ flutter test
 | Leave during loading | Welcome remains visible and no late navigation or error occurs | Passed in `leaving during loading does not navigate after disposal` |
 
 Latest automated result: **9 tests passed and Flutter analysis reported no
-issues.** Add emulator screenshots beside the three hostile cases in the Word
-document before submitting.
+issues.** The screenshots below can also be placed beside the matching answers
+in the Word document.
+
+## Screenshot evidence
+
+### Welcome foyer
+
+![Welcome foyer](<public/Screenshot 2026-10-28 182053.png>)
+
+### Empty-form validation
+
+![All four required validation messages](<public/Screenshot 2026-10-28 182105.png>)
+
+### Password visibility
+
+![Password shown after using the eye button](<public/Screenshot 2026-10-28 182118.png>)
+
+### Birth-date picker
+
+![Birth-date calendar](<public/Screenshot 2026-10-28 182149.png>)
+
+### Disabled loading state
+
+![One loading spinner while submission is guarded](<public/Screenshot 2026-10-28 182242.png>)
+
+### Personalized success and confetti
+
+![Personalized success with confetti](<public/Screenshot 2026-10-28 182249.png>)
+
+### Automated defensive checks
+
+![All nine automated tests passed](<public/Screenshot 2026-10-28 182633.png>)
 
 ## Ghost Hunt II answers
 
@@ -52,22 +82,23 @@ document before submitting.
 
 I protected the ballroom by checking the name before showing any welcome message. If the name is blank or only spaces, I send the visitor back to the foyer and remove the bad path. I tested this by opening the Success screen with three spaces as the name. The test returned to “Enter If You Dare” and confirmed that “Welcome, !” never appeared. This protects the visitor from seeing a broken page even when the normal form is bypassed.
 
-**Evidence to attach:** Screenshot of the foyer after the empty-name test and the
-`empty success name returns to the foyer` test result.
+**Evidence:** The Welcome foyer screenshot shows the safe destination, and the
+automated-check screenshot records the passing empty-name test described in the
+test table.
 
 ### The Vampire's Double Bite
 
 I used two protections against a fast double-tap. The button becomes unavailable during loading, and a separate yes-or-no guard rejects another submission before the screen can redraw. I tested this by tapping the submit action twice without waiting between taps. The app displayed one loading spinner and created only one Success screen. I kept the separate guard because the button alone can have a tiny timing gap before its new appearance is shown.
 
-**Evidence to attach:** Screenshot of the loading state and the
-`rapid double-tap creates only one success screen` test result.
+**Evidence:** The disabled loading-state screenshot shows the visible guard, and
+the automated-check screenshot records the passing rapid double-tap test.
 
 ### The Mansion Remembers Too Much
 
 I did not store the password anywhere because this app does not need it after the form closes. If a password were saved as plain text, someone with access to a device backup or a modified device could read it. My storage policy is to keep the password only in the form while that screen is open. The form releases its text holders when the visitor leaves, and Task C adds no local storage package. I verified the project has no password-saving call and no `shared_preferences` dependency.
 
-**Evidence to attach:** Screenshot of `pubspec.yaml` and the password controller's
-cleanup in `signup_screen.dart`.
+**Evidence:** The repository's `pubspec.yaml` contains no local-storage package,
+and `signup_screen.dart` releases the password text holder when the form closes.
 
 ## Engineering trade-off and improvement
 
