@@ -1,6 +1,8 @@
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 
+import 'welcome_screen.dart';
+
 class SuccessScreen extends StatefulWidget {
   const SuccessScreen({super.key, required this.userName});
 
@@ -15,10 +17,23 @@ class _SuccessScreenState extends State<SuccessScreen> {
     duration: const Duration(seconds: 3),
   );
 
+  bool get _hasValidName => widget.userName.trim().isNotEmpty;
+
   @override
   void initState() {
     super.initState();
-    _confettiController.play();
+    if (_hasValidName) {
+      _confettiController.play();
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute<void>(builder: (_) => const WelcomeScreen()),
+          (route) => false,
+        );
+      });
+    }
   }
 
   @override
@@ -29,6 +44,10 @@ class _SuccessScreenState extends State<SuccessScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_hasValidName) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       body: Stack(
         children: [
@@ -50,7 +69,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
                     const Text('🎃', style: TextStyle(fontSize: 72)),
                     const SizedBox(height: 16),
                     Text(
-                      'Welcome, ${widget.userName}!',
+                      'Welcome, ${widget.userName.trim()}!',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white,

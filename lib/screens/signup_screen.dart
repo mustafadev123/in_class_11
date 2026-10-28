@@ -19,6 +19,7 @@ class _SignupScreenState extends State<SignupScreen> {
   DateTime? _birthDate;
   bool _obscurePassword = true;
   bool _submitting = false;
+  bool _submissionStarted = false;
 
   @override
   void dispose() {
@@ -46,8 +47,9 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_submissionStarted || !_formKey.currentState!.validate()) return;
 
+    _submissionStarted = true;
     setState(() => _submitting = true);
     await Future<void>.delayed(const Duration(seconds: 2));
 

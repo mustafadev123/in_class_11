@@ -1,11 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:haunted_signup_mansion/main.dart';
+import 'package:haunted_signup_mansion/screens/signup_screen.dart';
+import 'package:haunted_signup_mansion/screens/success_screen.dart';
 
 void main() {
   Future<void> openSignupForm(WidgetTester tester) async {
     await tester.pumpWidget(const HauntedMansionApp());
     await tester.tap(find.text('Enter If You Dare'));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> fillValidSignup(WidgetTester tester) async {
+    await tester.enterText(find.byType(EditableText).at(0), 'Morgan');
+    await tester.enterText(
+      find.byType(EditableText).at(1),
+      'morgan@example.com',
+    );
+    await tester.enterText(find.byType(EditableText).at(2), 'secret1');
+    await tester.ensureVisible(find.byType(TextFormField).at(3));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(TextFormField).at(3));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('15').last);
+    await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
   }
 
@@ -74,20 +92,7 @@ void main() {
     tester,
   ) async {
     await openSignupForm(tester);
-    await tester.enterText(find.byType(EditableText).at(0), 'Morgan');
-    await tester.enterText(
-      find.byType(EditableText).at(1),
-      'morgan@example.com',
-    );
-    await tester.enterText(find.byType(EditableText).at(2), 'secret1');
-
-    await tester.ensureVisible(find.byType(TextFormField).at(3));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byType(TextFormField).at(3));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('15').last);
-    await tester.tap(find.text('OK'));
-    await tester.pumpAndSettle();
+    await fillValidSignup(tester);
 
     await tester.tap(find.text('Join the Mansion'));
     await tester.pump();
@@ -97,5 +102,51 @@ void main() {
     await tester.pump();
     expect(find.text('Welcome, Morgan!'), findsOneWidget);
     expect(find.text('Back to the Foyer'), findsOneWidget);
+  });
+
+  testWidgets('empty success name returns to the foyer', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: SuccessScreen(userName: '   ')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Enter If You Dare'), findsOneWidget);
+    expect(find.text('Welcome, !'), findsNothing);
+  });
+
+  testWidgets('rapid double-tap creates only one success screen', (
+    tester,
+  ) async {
+    await openSignupForm(tester);
+    await fillValidSignup(tester);
+
+    final submitButton = find.text('Join the Mansion');
+    await tester.tap(submitButton);
+    await tester.tap(submitButton);
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump();
+    expect(find.text('Welcome, Morgan!'), findsOneWidget);
+    expect(find.byType(SuccessScreen), findsOneWidget);
+  });
+
+  testWidgets('leaving during loading does not navigate after disposal', (
+    tester,
+  ) async {
+    await openSignupForm(tester);
+    await fillValidSignup(tester);
+    await tester.tap(find.text('Join the Mansion'));
+    await tester.pump();
+
+    Navigator.of(tester.element(find.byType(SignupScreen))).pop();
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump();
+
+    expect(find.text('Enter If You Dare'), findsOneWidget);
+    expect(find.byType(SuccessScreen), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 }
